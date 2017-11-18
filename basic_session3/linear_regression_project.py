@@ -42,10 +42,10 @@ C = [[1],
      [3]]
 
 #TODO 创建一个 4*4 单位矩阵
-I = [[1,2,3,4],
-     [2,3,4,5],
-     [3,4,5,6],
-     [4,5,6,7]]
+I = [[1,0,0,0],
+     [0,1,0,0],
+     [0,0,1,0],
+     [0,0,0,1]]
 
 
 # ## 1.2 返回矩阵的行数和列数
@@ -89,7 +89,7 @@ get_ipython().magic(u'run -i -e test.py LinearRegressionTestCase.test_matxRound'
 
 # ## 1.4 计算矩阵的转置
 
-# In[63]:
+# In[35]:
 
 
 # TODO 计算矩阵的转置
@@ -97,7 +97,7 @@ def transpose(M):
     return map(list, zip(*M));
 
 
-# In[64]:
+# In[36]:
 
 
 # 运行以下代码测试你的 transpose 函数
@@ -106,7 +106,7 @@ get_ipython().magic(u'run -i -e test.py LinearRegressionTestCase.test_transpose'
 
 # ## 1.5 计算矩阵乘法 AB
 
-# In[65]:
+# In[37]:
 
 
 # TODO 计算矩阵乘法 AB，如果无法相乘则raise ValueError
@@ -118,7 +118,7 @@ def matxMultiply(A, B):
     return [[sum(x * y for x, y in zip(a, b)) for b in zip(*B)] for a in A]
 
 
-# In[66]:
+# In[38]:
 
 
 # 运行以下代码测试你的 matxMultiply 函数
@@ -178,10 +178,7 @@ get_ipython().magic(u'run -i -e test.py LinearRegressionTestCase.test_augmentMat
 # TODO r1 <---> r2
 # 直接修改参数矩阵，无返回值
 def swapRows(M, r1, r2):
-    row1 = M[r1]
-    row2 = M[r2]
-    M[r2] = row1
-    M[r1] = row2
+    M[r1], M[r2] = M[r2], M[r1]
 
 
 # In[42]:
@@ -257,7 +254,7 @@ get_ipython().magic(u'run -i -e test.py LinearRegressionTestCase.test_addScaledR
 # 
 # 为了充分了解Gaussian Jordan消元法的计算流程，请根据Gaussian Jordan消元法，分别手动推演矩阵A为***可逆矩阵***，矩阵A为***奇异矩阵***两种情况。
 
-# In[8]:
+# In[47]:
 
 
 # 不要修改这里！
@@ -287,24 +284,30 @@ printInMatrixFormat(Ab,padding=4,truncating=0)
 #     -5 & -7 & 8 & -10 & 1\end{bmatrix}$
 # 
 # $ --> \begin{bmatrix}
-#     1 & -1 & 5 & 3 & -1\\
-#     0 & 4 & -14 & -20 & 5\\
-#     0 & -4 & 41 & 11 & -6\\
-#     0 & -12 & 33 & 5 & -4\end{bmatrix}$
+#     1 & -\frac{3}{7} & -\frac{6}{7} & \frac{10}{7} & -\frac{1}{7}\\
+#     0 & \frac{12}{7} & \frac{66}{7} & -\frac{96}{7} & \frac{11}{7}\\
+#     0 & \frac{4}{7} & -\frac{41}{7} & -\frac{11}{7} & \frac{6}{7}\\
+#     0 & -\frac{64}{7} & \frac{26}{7} & -\frac{20}{7} & \frac{2}{7}\end{bmatrix}$
 #     
 # $ --> \begin{bmatrix}
-#     1 & -1 & 5 & 3 & -1\\
-#     0 & 1 & -\frac{14}{4} & -5 & \frac{5}{4}\\
-#     0 & 0 & 27 & -9 & -1\\
-#     0 & 0 & -9 & -55 & 11\end{bmatrix}$
+#     1 & 0 & -\frac{33}{32} & \frac{25}{16} & -\frac{5}{32}\\
+#     0 & 1 & -\frac{13}{32} & \frac{5}{16} & -\frac{1}{32}\\
+#     0 & 0 & -\frac{45}{8} & -\frac{7}{4} & \frac{8}{7}\\
+#     0 & 0 & \frac{81}{8} & -\frac{57}{4} & \frac{13}{8}\end{bmatrix}$
 #     
 # $ --> \begin{bmatrix}
-#     1 & -1 & 5 & 3 & -1\\
-#     0 & 1 & -\frac{7}{2} & -5 & \frac{5}{4}\\
-#     0 & 0 & 1 & -\frac{1}{3} & -\frac{1}{27}\\
+#     1 & 0 & 0 & \frac{1}{9} & \frac{1}{108}\\
+#     0 & 1 & 0 & -\frac{7}{27} & \frac{11}{324}\\
+#     0 & 0 & 1 & -\frac{38}{27} & -\frac{13}{81}\\
+#     0 & 0 & 0 & -\frac{29}{3} & \frac{16}{9}\end{bmatrix}$
+#     
+# $ --> \begin{bmatrix}
+#     1 & 0 & 0 & 0 & \frac{28}{943}\\
+#     0 & 1 & 0 & 0 & -\frac{6}{437}\\
+#     0 & 0 & 1 & 0 & -\frac{77}{783}\\
 #     0 & 0 & 0 & 1 & -\frac{16}{87}\end{bmatrix}$
 
-# In[11]:
+# In[48]:
 
 
 # 不要修改这里！
@@ -332,26 +335,26 @@ printInMatrixFormat(Ab,padding=4,truncating=0)
 #     -9 & 9 & 9 & -3 & 1\end{bmatrix}$
 # 
 # $ --> \begin{bmatrix}
-#     1 & \frac{1}{7} & \frac{9}{7} & -\frac{4}{7} & \frac{1}{7}\\
+#     1 & -1 & -1 & -\frac{1}{3} & -\frac{1}{9}\\
 #     0 & -4 & -10 & 4 & 1\\
-#     0 & 0 & 12 & -5 & 2\\
-#     0 & \frac{72}{7} & \frac{144}{7} & -\frac{57}{7} & \frac{16}{7}\end{bmatrix}$
+#     0 & -8 & -4 & \frac{4}{3} & \frac{2}{9}\\
+#     0 & 8 & 16 & -\frac{19}{3} & \frac{16}{9}\end{bmatrix}$
 #     
 # $ --> \begin{bmatrix}
-#     1 & \frac{1}{7} & \frac{9}{7} & -\frac{4}{7} & \frac{1}{7}\\
-#     0 & 1 & \frac{10}{4} & -1 & -\frac{1}{4}\\
-#     0 & 0 & 12 & -5 & 2\\
-#     0 & 0 & -\frac{36}{7} & \frac{15}{7} & \frac{34}{7}\end{bmatrix}$
+#     1 & 0 & -\frac{1}{2} & \frac{1}{6} & -\frac{5}{36}\\
+#     0 & 1 & \frac{1}{2} & -\frac{1}{6} & -\frac{1}{36}\\
+#     0 & 0 & -8 & \frac{10}{3} & \frac{8}{9}\\
+#     0 & 0 & 12 & -5 & 2\end{bmatrix}$
 #     
 # $ --> \begin{bmatrix}
-#     1 & \frac{1}{7} & \frac{9}{7} & -\frac{4}{7} & \frac{1}{7}\\
-#     0 & 1 & \frac{10}{4} & -1 & -\frac{1}{4}\\
-#     0 & 0 & 1 & -\frac{5}{12} & \frac{2}{12}\\
-#     0 & 0 & 0 & 0 & 40\end{bmatrix}$
+#     1 & 0 & 0 & -\frac{1}{24} & -\frac{1}{18}\\
+#     0 & 1 & 0 & \frac{1}{24} & -\frac{1}{9}\\
+#     0 & 0 & 1 & -\frac{5}{12} & \frac{1}{6}\\
+#     0 & 0 & 0 & 0 & \frac{20}{9}\end{bmatrix}$
 
 # ### 2.3.3 实现 Gaussian Jordan 消元法
 
-# In[56]:
+# In[49]:
 
 
 # TODO 实现 Gaussain Jordan 方法求解 Ax = b
@@ -387,28 +390,21 @@ def gj_Solve(A, b, decPts=4, epsilon = 1.0e-16):
         if abs(M[i][i]) < epsilon: # This is a singular matrix
             return None
         
+        scaleRow(M, i, 1.0/M[i][i])
+        
         '''
         执行消元过程
         '''
-        for j in range(i+1, h):
-            scale = -M[j][i]/M[i][i]
-            addScaledRow(M,j,i,scale)
-
-    '''
-    执行代入过程
-    '''
-    for i in range(h-1,-1,-1):
-        for j in range(0,i):
-            scale = -M[j][i]/M[i][i]
-            addScaledRow(M,j,i,scale)
-        M[i][w-1] /= M[i][i]
-        M[i][i] = 1
+        for j in range(h):
+            if j != i:
+                scale = -M[j][i]/M[i][i]
+                addScaledRow(M,j,i,scale)
 
     result = [[row[w-1]] for row in M]
     return result
 
 
-# In[57]:
+# In[50]:
 
 
 # 运行以下代码测试你的 gj_Solve 函数
@@ -443,7 +439,7 @@ get_ipython().magic(u'run -i -e test.py LinearRegressionTestCase.test_gj_Solve')
 
 # ## 3.1 随机生成样本点
 
-# In[54]:
+# In[51]:
 
 
 # 不要修改这里！
@@ -466,12 +462,12 @@ plt.show()
 # 
 # ### 3.2.1 猜测一条直线
 
-# In[80]:
+# In[52]:
 
 
 #TODO 请选择最适合的直线 y = mx + b
-m = 0
-b = 0
+m = -1
+b = 20
 
 # 不要修改这里！
 plt.xlim((-5,5))
@@ -493,7 +489,7 @@ plt.show()
 # MSE = \frac{1}{n}\sum_{i=1}^{n}{(y_i - mx_i - b)^2}
 # $$
 
-# In[81]:
+# In[53]:
 
 
 # TODO 实现以下函数并输出所选直线的MSE
@@ -613,7 +609,7 @@ print(calculateMSE(X,Y,m,b))
 # 
 # 在3.3 中，我们知道线性回归问题等价于求解 $X^TXh = X^TY$ (如果你选择不做3.3，就勇敢的相信吧，哈哈)
 
-# In[84]:
+# In[54]:
 
 
 # TODO 实现线性回归
@@ -637,7 +633,7 @@ print(m,b)
 # 你求得的回归结果是什么？
 # 请使用运行以下代码将它画出来。
 
-# In[85]:
+# In[55]:
 
 
 # 请不要修改下面的代码
@@ -655,7 +651,7 @@ plt.show()
 
 # 你求得的回归结果对当前数据集的MSE是多少？
 
-# In[86]:
+# In[56]:
 
 
 print(calculateMSE(X,Y,m,b))
