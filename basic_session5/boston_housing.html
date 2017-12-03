@@ -11803,7 +11803,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># 载入此项目所需要的库</span>
@@ -11827,7 +11827,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># 载入波士顿房屋的数据集</span>
@@ -11894,25 +11894,25 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1">#TODO 1</span>
 
 <span class="c1">#目标：计算价值的最小值</span>
-<span class="n">minimum_price</span> <span class="o">=</span> <span class="n">prices</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="n">minimum_price</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
 
 <span class="c1">#目标：计算价值的最大值</span>
-<span class="n">maximum_price</span> <span class="o">=</span> <span class="n">prices</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="n">maximum_price</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
 
 <span class="c1">#目标：计算价值的平均值</span>
-<span class="n">mean_price</span> <span class="o">=</span> <span class="n">prices</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">mean_price</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
 
 <span class="c1">#目标：计算价值的中值</span>
-<span class="n">median_price</span> <span class="o">=</span> <span class="n">prices</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+<span class="n">median_price</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
 
 <span class="c1">#目标：计算价值的标准差</span>
-<span class="n">std_price</span> <span class="o">=</span> <span class="n">prices</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+<span class="n">std_price</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span>
 
 <span class="c1">#目标：输出计算的结果</span>
 <span class="k">print</span> <span class="s2">&quot;Statistics for Boston housing dataset:</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -11943,7 +11943,7 @@ Minimum price: $105,000.00
 Maximum price: $1,024,800.00
 Mean price: $454,342.94
 Median price $438,900.00
-Standard deviation of prices: $165,340.28
+Standard deviation of prices: $165,171.13
 </pre>
 </div>
 </div>
@@ -13085,7 +13085,7 @@ DBNJUjfDRJLUzTCRJHUzTCRJ3f4fD5wifNjiApwAAAAASUVORK5CYII=
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="&#38382;&#39064;-2---&#22238;&#31572;:">&#38382;&#39064; 2 - &#22238;&#31572;:<a class="anchor-link" href="#&#38382;&#39064;-2---&#22238;&#31572;:">&#182;</a></h3><h4 id="1.-&#21010;&#20998;&#20026;&#35757;&#32451;&#38598;&#21644;&#27979;&#35797;&#38598;&#26377;&#20309;&#22909;&#22788;&#65311;">1. &#21010;&#20998;&#20026;&#35757;&#32451;&#38598;&#21644;&#27979;&#35797;&#38598;&#26377;&#20309;&#22909;&#22788;&#65311;<a class="anchor-link" href="#1.-&#21010;&#20998;&#20026;&#35757;&#32451;&#38598;&#21644;&#27979;&#35797;&#38598;&#26377;&#20309;&#22909;&#22788;&#65311;">&#182;</a></h4><p>训练数据集用于模型构建</p>
 <p>测试数据集用于检测模型构建，此数据只在模型检验时使用，用于评估模型的准确率。</p>
-<p>如果不划分，用全体数据进行模型训练，容易导致过度拟合。</p>
+<p>如果不划分，用全体数据进行模型训练，训练的模型自然是最契合这些数据的，再从中挑出数据来测试，测试表现肯定也好的。但是换了其它数据集测试这个模型，效果可能就没那么好了。</p>
 <h4 id="2.-&#29992;&#27169;&#22411;&#24050;&#32463;&#35265;&#36807;&#30340;&#25968;&#25454;&#36827;&#34892;&#27979;&#35797;&#26377;&#20309;&#22351;&#22788;&#65311;">2. &#29992;&#27169;&#22411;&#24050;&#32463;&#35265;&#36807;&#30340;&#25968;&#25454;&#36827;&#34892;&#27979;&#35797;&#26377;&#20309;&#22351;&#22788;&#65311;<a class="anchor-link" href="#2.-&#29992;&#27169;&#22411;&#24050;&#32463;&#35265;&#36807;&#30340;&#25968;&#25454;&#36827;&#34892;&#27979;&#35797;&#26377;&#20309;&#22351;&#22788;&#65311;">&#182;</a></h4><p>如果用模型已经见过的数据来测试，就相当于“既当球员又当裁判”，无法很好的识别出模型训练可能出现的欠拟合或过拟合。</p>
 
 </div>
@@ -14885,7 +14885,51 @@ RCSsKPGJiEhYUeITEZGw8v8MnQw8HlAomQAAAABJRU5ErkJggg==
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="&#38382;&#39064;-7---&#22238;&#31572;:">&#38382;&#39064; 7 - &#22238;&#31572;:<a class="anchor-link" href="#&#38382;&#39064;-7---&#22238;&#31572;:">&#182;</a></h3><p>网格搜索法简单来说就是用穷举法测试所有可能的参数组合，然后通过交叉检验找到拟合度最高的那组参数。</p>
+<h3 id="&#38382;&#39064;-7---&#22238;&#31572;:">&#38382;&#39064; 7 - &#22238;&#31572;:<a class="anchor-link" href="#&#38382;&#39064;-7---&#22238;&#31572;:">&#182;</a></h3><p>网格搜索法简单来说就是用穷举法测试给定参数取值范围下的所有组合，然后通过给定的评价函数找到效果最好的那组参数。</p>
+<p>所谓网格，可以理解为给定参数组合矩阵。例如有两个参数A和B，参数A的取值范围为[0,5]区间内的整数，参数B的取值范围为(10,20,30)，则可以构建如下形式的参数网格：</p>
+<table>
+<thead><tr>
+<th></th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>(0,10)</td>
+<td>(1,10)</td>
+<td>(2,10)</td>
+<td>(3,10)</td>
+<td>(4,10)</td>
+<td>(5,10)</td>
+</tr>
+<tr>
+<td>20</td>
+<td>(0,20)</td>
+<td>(1,20)</td>
+<td>(2,20)</td>
+<td>(3,20)</td>
+<td>(4,20)</td>
+<td>(5,20)</td>
+</tr>
+<tr>
+<td>30</td>
+<td>(0,30)</td>
+<td>(1,30)</td>
+<td>(2,30)</td>
+<td>(3,30)</td>
+<td>(4,30)</td>
+<td>(5,30)</td>
+</tr>
+</tbody>
+</table>
+<p>其中构建网格的参数是我们给定的，参数的取值范围也是给给定的。</p>
+<p>为了确定那组参数是最优的，需要给定评价函数用于参数效果评估。</p>
 
 </div>
 </div>
@@ -14910,10 +14954,10 @@ RCSsKPGJiEhYUeITEZGw8v8MnQw8HlAomQAAAABJRU5ErkJggg==
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="&#38382;&#39064;-8---&#22238;&#31572;&#65306;">&#38382;&#39064; 8 - &#22238;&#31572;&#65306;<a class="anchor-link" href="#&#38382;&#39064;-8---&#22238;&#31572;&#65306;">&#182;</a></h3><ol>
-<li>K折交叉验证，首先将数据集分割成K个子集，其中一个子集作为验证数据集，其他K-1个子集用来训练，训练完成后用验证数据集进行验证。重复K次上述过程，每个子子集验证一次，平均K次的结果，最终得到一个最终的结果。</li>
+<li>K折交叉验证，首先将<strong>全体数据</strong>分割成K个子集，其中一个子集作为验证数据集，其他K-1个子集用来训练，训练完成后用验证数据集进行验证。重复K次上述过程，每个子子集验证一次，平均K次的结果，最终得到一个最终的结果。默认情况下 Kfold 是对数据按顺序切分，即每次切分的数据切分的结果都一样。可以通过<code>shuffle=True</code>设置为随机切分。</li>
 <li>GridSearchCV会将每一个参数组合，都利用交叉检验的方式执行一遍，即在训练集和测试集上分别运行计算出训练分和测试分，最终得到每个参数组合的平均分，通过对分值的比较，找到最优的参数组合。</li>
 <li><code>'cv_results_'</code>能够提供很多信息，除了运行时间，还包括每个参数在每个训练集和测试集上的训练分数和测试分数，以及平均训练分数和测试分数。最终告诉我们哪个参数是最有参数。</li>
-<li>如果不使用交叉验证容易出现过拟合或欠拟合的情况。交叉验证将数据集分割成训练集和测试集，不把所有的数据都用于训练，也不把训练过的数据用于验证，从而避免过拟合和欠拟合。</li>
+<li>如果不使用交叉验证可能出现过拟合或欠拟合的情况。由于数据本身可能存在一定的顺序上的关联性，比如某一类数据都集中在数据集的开头，如果固定划分训练集和测试集，可能使训练集或测试集数据带有了某类较强的特征属性而缺少了其他属性，无法很好地泛化或验证。采用交叉验证，重复划分组合出不同的训练集和测试集，从有限的数据中尽可能获得多的有效信息，反复训练、测试，最终返回模型准确率的均值，从而避免过拟合和欠拟合。</li>
 </ol>
 
 </div>
@@ -15234,7 +15278,50 @@ Predicted selling price for Client 3&#39;s home: $951,510.00
 <li><p>客户3建议房价 $951,510</p>
 </li>
 </ul>
-<p>房间数量往往决定房屋面积，上面三个房屋，房屋3的房间数最多，估计面积最大，因此总价最高。而房屋2的房间数最少，所以总价最小。房屋1居中。</p>
+<h4 id="&#20174;&#32479;&#35745;&#23398;&#19978;&#30475;">&#20174;&#32479;&#35745;&#23398;&#19978;&#30475;<a class="anchor-link" href="#&#20174;&#32479;&#35745;&#23398;&#19978;&#30475;">&#182;</a></h4><p>上面3个客户的房价预测均在样本数据集房价区间[105000,1024800]，均价531371，与总体样本均值454342相差约半个标准差；预测房价数据的中位数410250与总体样本的中位数438900相差很小。如果执行t检验，</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ttest_ind</span>
+
+<span class="k">print</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">prices</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">410250.00</span><span class="p">,</span><span class="mf">232353.33</span><span class="p">,</span><span class="mf">951510.00</span><span class="p">]))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Ttest_indResult(statistic=-0.7977587230438149, pvalue=0.42539694571772968)
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>可以计算出 $p=0.425&gt;0.05$, 因此差异不显著，所以预测的房价合理。</p>
+<h4 id="&#20174;&#25151;&#23627;&#23646;&#24615;&#19978;&#30475;">&#20174;&#25151;&#23627;&#23646;&#24615;&#19978;&#30475;<a class="anchor-link" href="#&#20174;&#25151;&#23627;&#23646;&#24615;&#19978;&#30475;">&#182;</a></h4><p>房间数量往往决定房屋面积，上面三个房屋，房屋3的房间数最多，估计面积最大，因此总价最高。而房屋2的房间数最少，所以总价最小。房屋1居中。</p>
 <p>再看社区贫困指数，房屋2的社区贫困指数最高，所以影响房价进一步降低，而房屋3的贫困指数只有3%，属于高尚社区，因此房价估计更高。</p>
 <p>最后看教育资源，依然是房屋2的学生/教师比例最高，进一步影响房价降低，而房屋3的教育资源最丰富，因此预计房价进一步提高。</p>
 <p>因此，模型给出的房价估计是合理的。</p>
