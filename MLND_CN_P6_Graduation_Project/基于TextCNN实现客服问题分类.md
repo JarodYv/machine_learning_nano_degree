@@ -402,37 +402,37 @@ y_pred_cls = tf.argmax(tf.nn.softmax(logits), 1)  # 预测类别
 
 > ```
 > Epoch: 1
-> Iter:   0, Train Loss:    2.6, Train Acc:   4.69%, Val Loss:    2.6, Val Acc:   7.46%
-> Iter:   100, Train Loss: 0.32, Train Acc:  95.31%, Val Loss:   0.33, Val Acc:  93.66%
-> Iter:   200, Train Loss: 0.34, Train Acc:  93.75%, Val Loss:   0.14, Val Acc:  96.39%
+> Iter: 0, Train Loss:    2.6, Train Acc:   4.69%, Val Loss:    2.6, Val Acc:  7.46%
+> Iter: 100, Train Loss: 0.32, Train Acc:  95.31%, Val Loss:   0.33, Val Acc: 93.66%
+> Iter: 200, Train Loss: 0.34, Train Acc:  93.75%, Val Loss:   0.14, Val Acc: 96.39%
 > Epoch: 2
-> Iter:   300, Train Loss:0.055, Train Acc:  96.88%, Val Loss:   0.11, Val Acc:  97.10%
-> Iter:   400, Train Loss:0.087, Train Acc:  96.88%, Val Loss:   0.11, Val Acc:  97.04%
+> Iter: 300, Train Loss:0.055, Train Acc:  96.88%, Val Loss:   0.11, Val Acc: 97.10%
+> Iter: 400, Train Loss:0.087, Train Acc:  96.88%, Val Loss:   0.11, Val Acc: 97.04%
 > Epoch: 3
-> Iter:   500, Train Loss: 0.17, Train Acc:  96.88%, Val Loss:    0.1, Val Acc:  97.04%
-> Iter:   600, Train Loss:0.032, Train Acc:  98.44%, Val Loss:    0.1, Val Acc:  97.16%
+> Iter: 500, Train Loss: 0.17, Train Acc:  96.88%, Val Loss:    0.1, Val Acc: 97.04%
+> Iter: 600, Train Loss:0.032, Train Acc:  98.44%, Val Loss:    0.1, Val Acc: 97.16%
 > Epoch: 4
-> Iter:   700, Train Loss:0.095, Train Acc:  96.88%, Val Loss:    0.1, Val Acc:  97.10%
-> Iter:   800, Train Loss:0.053, Train Acc:  96.88%, Val Loss:    0.1, Val Acc:  97.10%
+> Iter: 700, Train Loss:0.095, Train Acc:  96.88%, Val Loss:    0.1, Val Acc: 97.10%
+> Iter: 800, Train Loss:0.053, Train Acc:  96.88%, Val Loss:    0.1, Val Acc: 97.10%
 > Epoch: 5
-> Iter:   900, Train Loss: 0.16, Train Acc:  98.44%, Val Loss:   0.11, Val Acc:  97.16%
-> Iter:   1000, Train Loss:0.062, Train Acc:  98.44%, Val Loss:  0.11, Val Acc:  96.74%
+> Iter: 900, Train Loss: 0.16, Train Acc:  98.44%, Val Loss:   0.11, Val Acc: 97.16%
+> Iter: 1000, Train Loss:0.062, Train Acc:  98.44%, Val Loss:  0.11, Val Acc: 96.74%
 > Epoch: 6
-> Iter:   1100, Train Loss:0.023, Train Acc:  98.44%, Val Loss:  0.11, Val Acc:  96.86%
-> Iter:   1200, Train Loss:0.018, Train Acc:  98.44%, Val Loss:  0.11, Val Acc:  96.74%
+> Iter: 1100, Train Loss:0.023, Train Acc:  98.44%, Val Loss:  0.11, Val Acc: 96.86%
+> Iter: 1200, Train Loss:0.018, Train Acc:  98.44%, Val Loss:  0.11, Val Acc: 96.74%
 > Epoch: 7
-> Iter:   1300, Train Loss:0.039, Train Acc:  98.44%, Val Loss:  0.11, Val Acc:  96.80%
-> Iter:   1400, Train Loss:0.012, Train Acc: 100.00%, Val Loss:  0.12, Val Acc:  96.63%
+> Iter: 1300, Train Loss:0.039, Train Acc:  98.44%, Val Loss:  0.11, Val Acc: 96.80%
+> Iter: 1400, Train Loss:0.012, Train Acc: 100.00%, Val Loss:  0.12, Val Acc: 96.63%
 > Epoch: 8
-> Iter:   1500, Train Loss: 0.0088, Train Acc: 100.00%, Val Loss:0.11, Val Acc:  96.68%
-> Iter:   1600, Train Loss:  0.019, Train Acc:  98.44%, Val Loss:0.12, Val Acc:  96.74%
+> Iter: 1500, Train Loss: 0.0088, Train Acc: 100.00%, Val Loss:0.11, Val Acc: 96.68%
+> Iter: 1600, Train Loss:  0.019, Train Acc:  98.44%, Val Loss:0.12, Val Acc: 96.74%
 > Epoch: 9
-> Iter:   1700, Train Loss: 0.0042, Train Acc: 100.00%, Val Loss:0.13, Val Acc:  96.68%
-> Iter:   1800, Train Loss:  0.013, Train Acc: 100.00%, Val Loss:0.14, Val Acc:  96.51%
-> Iter:   1900, Train Loss:  0.064, Train Acc:  95.31%, Val Loss:0.13, Val Acc:  96.68%
+> Iter: 1700, Train Loss: 0.0042, Train Acc: 100.00%, Val Loss:0.13, Val Acc: 96.68%
+> Iter: 1800, Train Loss:  0.013, Train Acc: 100.00%, Val Loss:0.14, Val Acc: 96.51%
+> Iter: 1900, Train Loss:  0.064, Train Acc:  95.31%, Val Loss:0.13, Val Acc: 96.68%
 > Epoch: 10
-> Iter:   2000, Train Loss:  0.013, Train Acc: 100.00%, Val Loss:0.13, Val Acc:  96.63%
-> Iter:   2100, Train Loss: 0.0031, Train Acc: 100.00%, Val Loss:0.13, Val Acc:  96.63%
+> Iter: 2000, Train Loss:  0.013, Train Acc: 100.00%, Val Loss:0.13, Val Acc: 96.63%
+> Iter: 2100, Train Loss: 0.0031, Train Acc: 100.00%, Val Loss:0.13, Val Acc: 96.63%
 > ```
 
 从训练结果可以看出，100次迭代之后，验证集上的准确率就能达到90%，整个训练结束后，最好结果在验证集上准确率可以达到97.16%，相当不错。
