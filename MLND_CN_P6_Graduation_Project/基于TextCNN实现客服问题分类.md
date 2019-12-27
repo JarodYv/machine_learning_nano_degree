@@ -98,13 +98,6 @@ col = db["question"]
 
 将数据从MongoDB读入Pandas，对数据进行简单的探索。
 
-```python
-import pandas as pd
-
-df = pd.DataFrame(list(col.find()))
-df.info()
-```
-
 输出结果：
 
 > ```
@@ -128,12 +121,6 @@ df.info()
 #### 2.2.2 对`type`的统计描述
 
 我们要解决的问题是希望对问题进行分类，即建立从`question`到`type`的映射，所以需要关注有多少种分类。
-
-```python
-df_groupby_type = df.groupby(["type"]).count()
-df_groupby_type["rate(%)"] = df_groupby_type["question"]*100/df_groupby_type["question"].sum()# 计算各分类占比
-df_groupby_type[["question", "rate(%)"]]
-```
 
 输出结果：
 
@@ -162,10 +149,7 @@ df_groupby_type[["question", "rate(%)"]]
 
 #### 2.2.3 对`question`的统计描述
 
-```python
-df["q_len"] = df["question"].str.len() # 统计问题字数
-df['q_len'].describe()
-```
+接下来看一下客户问题的属性。我们比较关注问题的长度，所以对问题字数做统计。
 
 输出如下：
 
@@ -226,11 +210,44 @@ df['q_len'].describe()
 
 综上，在模型算法上采用深度学习方法，利用TextCNN进行文本分类；实现上使用Tensorflow开发和部署。
 
+### 2.4 基准指标
+
+**Yoon Kim**的论文<sup>[2]</sup> [Convolutional Neural Networks for Sentence Classification](https://arxiv.org/abs/1408.5882) 给出的测试结果如下：
+
+| Model            | MR       | SST-1 | SST-2    | Subj | TREC | CR       | MPQA     |
+| ---------------- | -------- | ----- | -------- | ---- | ---- | -------- | -------- |
+| CNN-rand         | 76.1     | 45.0  | 82.7     | 89.6 | 91.2 | 79.8     | 83.4     |
+| CNN-static       | 81       | 45.5  | 86.8     | 93   | 92.8 | 84.7     | **89.6** |
+| CNN-non-static   | **81.5** | 48.0  | 87.2     | 93.4 | 93.6 | 84.3     | 89.5     |
+| CNN-multichannel | 81.1     | 47.4  | **88.1** | 93.2 | 92.2 | **85.0** | 89.4     |
+
+<small>上表中MR，SST-2, SST-3, Subj, TREC, CR, MPQA是数据集名称，作者用了4各模型变种进行测试。</small>
+
+<small>CNN-rand：基线模型，所有词随机初始化并在训练过程中修改；</small>
+
+<small>CNN-static：采用预先训练好的词向量，所有词包括未知词随机初始化；</small>
+
+<small>CNN-non-static：同CNN-static，只是预处理的词向量针对每个任务做了优化；</small>
+
+<small>CNN-multichannel：采用2个预先训练好的词向量，每个词向量视为一个通道。</small>
+
+作者给出的结论是基线模型（CNN-rand）表现的不是很好，但是即便是简单的CNN-static模型，表现已经可圈可点，可以战胜大多数之前的成熟的深度学习模型，并且在**MPQA**数据集上取得了最高分--**89.6%**
+
+| Data | 分类数 | 平均句子长度 | 数据量 | 词汇量 | 预训练词向量词汇数 | 测试集     |
+| ---- | ------ | ------------ | ------ | ------ | ------------------ | ---------- |
+| MPQA | 2      | 3            | 10606  | 6246   | 6083               | 10-fold CV |
+
+<small>MPQA: Opinion polarity detection subtask of the MPQA dataset (Wiebe et al., 2005).</small>
+
+我接下来实现的模型会自己训练词向量，跟CNN-static类似，所以对标CNN-static比较合理。由于作者采用了多个数据集进行测试，MPQA跟我要解决的问题比较接近--句子数少，数据量相当，词汇量也差不多。刚好CNN-static又在MPQA数据集上表现最好，所以参照CNN-static在MPQA上的表现。
+
+考虑到论文中的数据都是文章，句子多且长，而我的任务都是比较短的客户提问，基本都是一句话，平均字数也较少（平均13个字），所以预期我的模型分类准确率要高于**89.6%**，至少要达到**90%**以上，能够达到**99%**在工业应用上最好。
+
 
 
 ## 3. 模型实现
 
-本模型的实现参考了**Yoon Kim**的论文[(2014 EMNLP) Convolutional Neural Networks for Sentence Classification](https://arxiv.org/abs/1408.5882)，论文中Yoon Kim的TextCNN结构可以描述为下图的网络：
+本模型的实现参考了**Yoon Kim**的论文[Convolutional Neural Networks for Sentence Classification](https://arxiv.org/abs/1408.5882)，论文中Yoon Kim的TextCNN结构可以描述为下图的网络：
 
 ![](.\img\p7.png)
 
@@ -251,65 +268,39 @@ TextCNN的实现过程可以分为图下4步：
 <center>图8：数据预处理步骤</center>
 #### 3.1.1 分词并统计词频
 
-分词采用结巴分词对中文进行分词。分词前先做去标点符号处理，然后再分词，接着去掉停用词，统计词频。
+分词采用结巴分词对中文进行分词。分词前先做去标点符号处理，然后再分词，接着去掉停用词，统计词频。分词结果保存到dataframe的`fenci`列，词频的统计保存到`word_dict`字典中，用于下一步构建字典。
 
-```python
-trantab = str.maketrans({key: None for key in string.punctuation+'？，。'+string.digits})
-word_dict = {}
+数据结构
 
-# 加载去停用词表
-stopword = open('./stopwords.txt', 'r', encoding='utf-8')
-stop = [key.strip(' \n') for key in stopword]
-
-# 判断是否是停用词
-def is_stop_word(word):
-    return (word == '') or (word in stop)
-
-# 对问题进行分词，并统计词频
-def word_split(question):
-    question = question.translate(trantab)# 去标点符号和数字
-    word_list = jieba.cut(question)# 用结巴分词进行中文分词
-    word_content = ''
-    for word in word_list:
-        word = word.strip(' ')
-        if not is_stop_word(word):
-            word_content += word + ' '
-            word_dict.setdefault(word, 0) # 如果这个词第一次出现，就把给词语的默认值设为0
-            word_dict[word] += 1
-    return word_content
-
-df['fenci'] = df.apply(lambda row: word_split(row['question']), axis=1)
-```
+|      |   no |                           question |   type | q_len |                         fenci |
+| ---: | ---: | ---------------------------------: | -----: | ----: | ----------------------------: |
+|    0 |  0.0 |               法律要求残疾保险吗？ | 伤残险 |    10 |                法律 残疾 保险 |
+|    1 |  1.0 |       债权人可以在死后人寿保险吗？ |   寿险 |    14 |            债权人 死 人寿保险 |
+|    2 |  2.0 |           旅行者保险有租赁保险吗？ | 租赁险 |    12 |         旅行者 保险 租赁 保险 |
+|    3 |  3.0 |     我可以开一辆没有保险的新车吗？ |   车险 |    15 |             开 一辆 保险 新车 |
+|    4 |  4.0 | 人寿保险的现金转出价值是否应纳税？ |   寿险 |    17 | 人寿保险 现金 转 价值 应 纳税 |
 
 #### 3.1.2 生成词汇表
 
-根据上面的字典，生成word-to-id的映射表。
+根据`word_dict`中的词汇，生成word-to-id的映射表。
 
-```python
-word_df = pd.DataFrame(zip(word_dict.keys(), word_dict.values()))
-word_df.rename(columns={0:'word', 1:'freq'}, inplace = True)
-word_df.head(5)
-```
+考虑到数据输入到CNN时需要对齐，所以需要用0补齐，字典第一个词固定写死为`<PAD>`。
+
+这里构建词汇表时采用了一个技巧，直接用dataframe的index作为id，所以构建词汇表很简单，只需要从python字典构建dataframe即可。
 
 生成的数据格式如下：
 
 > |      |   word | freq |
 > | ---: | -----: | ---- |
-> |    0 |   法律 | 27   |
-> |    1 |   残疾 | 912  |
-> |    2 |   保险 | 6561 |
-> |    3 | 债权人 | 43   |
-> |    4 |     死 | 15   |
+> |      |  <PAD> | 0    |
+> |    1 |   法律 | 27   |
+> |    2 |   残疾 | 912  |
+> |    3 |   保险 | 6561 |
+> |    4 | 债权人 | 43   |
 
 其中用data frame的index作为id，word是词，freq是词频。
 
-用同样的方法生成分类的映射表
-
-```python
-type_df = pd.DataFrame(zip(df_groupby_type.index,df_groupby_type['question']))
-type_df.rename(columns={0:'type', 1:'freq'}, inplace = True)
-type_df.head(5)
-```
+用同样的方法生成分类的映射表，
 
 生成的数据格式如下：
 
@@ -327,13 +318,6 @@ type_df.head(5)
 
 采用**8:1:1**的比例将数据集划分为训练集、测试集和验证集。
 
-```python
-from sklearn.model_selection import train_test_split
-X_train, X_test, Y_train, Y_test = train_test_split(df['fenci'], df['type'], test_size=0.20, random_state=1018)
-X_test, X_valid, Y_test, Y_valid = train_test_split(X_test, Y_test, test_size=0.50, random_state=1018)
-print("训练集：%d\n测试集：%d\n验证集：%d" % (X_train.count(), X_test.count(), X_valid.count()))
-```
-
 按照上面代码划分后：
 
 * 训练集	13512
@@ -342,13 +326,7 @@ print("训练集：%d\n测试集：%d\n验证集：%d" % (X_train.count(), X_tes
 
 #### 3.1.4 数据向量化
 
-目前数据集中的数据还是分词后的文本，我们需要根据第2步构建的字典将问题和分类进行向量化处理。处理过程很简单，就是查字典的过程，需要注意的是由于问题长度不通过，分词出来的个数不同，为了LSTM能够使用，需要做阶段或补齐。根据数据探索部分对问题长度的统计，问题都不长，平均13个字（含标点），这里将分词个数设置为10个。最后将数据转化为numpy格式，这样数据准备工作就完成了。
-
-```python
-train_input, train_output = word2vector(X_train, Y_train)
-test_input , test_output  = word2vector(X_test , Y_test)
-valid_input, valid_output = word2vector(X_valid, Y_valid)
-```
+目前数据集中的数据还是分词后的文本，我们需要根据第2步构建的字典将问题和分类进行向量化处理。处理过程很简单，就是查字典的过程，需要注意的是由于问题长度不通过，分词出来的个数不同，为了CNN能够使用，需要做截断或补齐。根据数据探索部分对问题长度的统计，问题都不长，平均13个字（含标点），这里将分词个数设置为10个。最后将数据转化为numpy格式，这样数据准备工作就完成了。
 
 处理后的数据结构如下
 
@@ -366,7 +344,7 @@ valid_input, valid_output = word2vector(X_valid, Y_valid)
 ![](.\img\p11.png)
 
 <center>图9：实际实现的TextCNN网络结构</center>
-代码实现如下：
+具体实现代码请参见`Insurance Question Classification with TextCNN.ipynb`
 
 ```python
 # 超参数
@@ -377,27 +355,6 @@ embedding_dim = 64  					# 词向量维度
 num_filters = 256  						# 卷积核数目
 kernel_size = 5  						# 卷积核尺寸
 hidden_dim = 128  						# 全连接层神经元
-```
-
-```python
-# embedding层
-embedding = tf.get_variable('embedding', [vocab_size, embedding_dim])
-embedding_inputs = tf.nn.embedding_lookup(embedding, input_x)
-
-# CNN层
-conv = tf.layers.conv1d(embedding_inputs, num_filters, kernel_size, name='conv')
-
-# max pooling层
-gmp = tf.reduce_max(conv, reduction_indices=[1], name='gmp')
-
-# 全连接层，后面接dropout以及relu激活
-fc = tf.layers.dense(gmp, hidden_dim, name='fc1')
-fc = tf.contrib.layers.dropout(fc, keep_prob)
-fc = tf.nn.relu(fc)
-
-# 分类器
-logits = tf.layers.dense(fc, num_classes, name='fc2')
-y_pred_cls = tf.argmax(tf.nn.softmax(logits), 1)  # 预测类别
 ```
 
 训练过程采用设置了10轮迭代，训练过程输出如下：
@@ -437,51 +394,117 @@ y_pred_cls = tf.argmax(tf.nn.softmax(logits), 1)  # 预测类别
 > Iter: 2100, Train Loss: 0.0031, Train Acc: 100.00%, Val Loss:0.13, Val Acc: 96.63%
 > ```
 
-从训练结果可以看出，100次迭代之后，验证集上的准确率就能达到90%，整个训练结束后，最好结果在验证集上准确率可以达到97.16%，相当不错。
+从训练结果可以看出，100次迭代之后，验证集上的准确率就能达到90%，整个训练结束后，最好结果在验证集上准确率可以达到97.16%，效果还不错。
+
+
+
+由于我们的数据集问题长度比较短，分次数比较少，所以尝试降低核数和过滤器再尝试训练一次。
+
+```python
+embedding_dim = 32  	# 词向量减少一半
+num_filters = 128  		# 卷积核数目减少一半
+kernel_size = 3  		# 卷积核尺寸
+hidden_dim = 128 	 	# 全连接层神经元不变
+```
+
+输出结果如下：
+
+> ```
+> Epoch: 1
+> Iter:  0, Train Loss:    2.6, Train Acc:   6.25%, Val Loss:    2.6, Val Acc:  10.01%
+> Iter:  100, Train Loss:   0.83, Train Acc:  70.31%, Val Loss: 0.71, Val Acc:  76.49%
+> Iter:  200, Train Loss:   0.22, Train Acc:  90.62%, Val Loss:  0.2, Val Acc:  95.20%
+> Epoch: 2
+> Iter:  300, Train Loss:   0.12, Train Acc:  95.31%, Val Loss: 0.15, Val Acc:  96.09%
+> Iter:  400, Train Loss:  0.081, Train Acc:  96.88%, Val Loss: 0.12, Val Acc:  97.04%
+> Epoch: 3
+> Iter:  500, Train Loss:  0.067, Train Acc:  98.44%, Val Loss: 0.11, Val Acc:  97.10%
+> Iter:  600, Train Loss:   0.08, Train Acc:  96.88%, Val Loss: 0.11, Val Acc:  97.04%
+> Epoch: 4
+> Iter:  700, Train Loss:  0.041, Train Acc:  98.44%, Val Loss: 0.11, Val Acc:  96.92%
+> Iter:  800, Train Loss:  0.097, Train Acc:  95.31%, Val Loss:  0.1, Val Acc:  97.22%
+> Epoch: 5
+> Iter:  900, Train Loss:   0.01, Train Acc: 100.00%, Val Loss:  0.1, Val Acc:  97.16%
+> Iter: 1000, Train Loss:  0.079, Train Acc:  96.88%, Val Loss:  0.1, Val Acc:  97.10%
+> Epoch: 6
+> Iter: 1100, Train Loss:  0.019, Train Acc: 100.00%, Val Loss:  0.1, Val Acc:  96.98%
+> Iter: 1200, Train Loss:  0.014, Train Acc: 100.00%, Val Loss: 0.11, Val Acc:  96.98%
+> Epoch: 7
+> Iter: 1300, Train Loss: 0.00028, Train Acc: 100.00%, Val Loss:  0.1, Val Acc: 96.98%
+> Iter: 1400, Train Loss:  0.048, Train Acc:  98.44%, Val Loss: 0.11, Val Acc:  96.80%
+> Epoch: 8
+> Iter: 1500, Train Loss:  0.012, Train Acc: 100.00%, Val Loss: 0.11, Val Acc:  96.98%
+> Iter: 1600, Train Loss: 0.0079, Train Acc: 100.00%, Val Loss: 0.12, Val Acc:  96.80%
+> Epoch: 9
+> Iter: 1700, Train Loss: 0.0032, Train Acc: 100.00%, Val Loss: 0.11, Val Acc:  96.92%
+> Iter: 1800, Train Loss:  0.035, Train Acc:  98.44%, Val Loss: 0.11, Val Acc:  96.98%
+> Iter: 1900, Train Loss: 0.0026, Train Acc: 100.00%, Val Loss: 0.11, Val Acc:  96.98%
+> Epoch: 10
+> Iter: 2000, Train Loss:  0.027, Train Acc:  98.44%, Val Loss: 0.11, Val Acc:  96.86%
+> Iter: 2100, Train Loss:  0.019, Train Acc: 100.00%, Val Loss: 0.12, Val Acc:  96.74%
+> ```
+
+从验证集的效果看，没有明显的提升，并且比上一版稍差。所以换个方向，提高过滤器和核数，看一下效果。
+
+```python
+embedding_dim = 64  	# 词向量维度
+num_filters = 512  		# 卷积核数目
+kernel_size = 7  		# 卷积核尺寸
+hidden_dim = 512  		# 全连接层神经元
+```
+
+输出结果如下：
+
+> ```
+> Epoch: 1
+> Iter:   0, Train Loss:    2.6, Train Acc:  26.56%, Val Loss:  2.60, Val Acc:  18.65%
+> Iter:  100, Train Loss:   0.17, Train Acc:  96.88%, Val Loss: 0.26, Val Acc:  94.02%
+> Iter:  200, Train Loss:   0.17, Train Acc:  92.19%, Val Loss: 0.14, Val Acc:  96.45%
+> Epoch: 2
+> Iter:  300, Train Loss:  0.059, Train Acc:  98.44%, Val Loss: 0.12, Val Acc:  96.68%
+> Iter:  400, Train Loss:  0.059, Train Acc:  98.44%, Val Loss: 0.11, Val Acc:  96.86%
+> Epoch: 3
+> Iter:  500, Train Loss:  0.085, Train Acc:  96.88%, Val Loss: 0.11, Val Acc:  96.86%
+> Iter:  600, Train Loss: 0.0094, Train Acc: 100.00%, Val Loss: 0.11, Val Acc:  96.98%
+> Epoch: 4
+> Iter:  700, Train Loss:  0.019, Train Acc: 100.00%, Val Loss: 0.11, Val Acc:  96.68%
+> Iter:  800, Train Loss:  0.019, Train Acc:  98.44%, Val Loss: 0.12, Val Acc:  96.80%
+> Epoch: 5
+> Iter:  900, Train Loss:  0.011, Train Acc: 100.00%, Val Loss: 0.13, Val Acc:  96.39%
+> Iter: 1000, Train Loss:  0.012, Train Acc: 100.00%, Val Loss: 0.13, Val Acc:  96.80%
+> Epoch: 6
+> Iter: 1100, Train Loss: 0.00098, Train Acc: 100.00%, Val Loss: 0.14, Val Acc: 96.92%
+> Iter: 1200, Train Loss: 0.0072, Train Acc: 100.00%, Val Loss: 0.14, Val Acc:  96.45%
+> Epoch: 7
+> Iter: 1300, Train Loss:  0.041, Train Acc:  98.44%, Val Loss: 0.15, Val Acc:  96.51%
+> Iter: 1400, Train Loss:  0.043, Train Acc:  98.44%, Val Loss: 0.16, Val Acc:  96.74%
+> Epoch: 8
+> Iter: 1500, Train Loss:  0.079, Train Acc:  96.88%, Val Loss: 0.15, Val Acc:  96.80%
+> Iter: 1600, Train Loss:  0.015, Train Acc: 100.00%, Val Loss: 0.16, Val Acc:  96.39%
+> Epoch: 9
+> Iter: 1700, Train Loss:  0.052, Train Acc:  96.88%, Val Loss: 0.24, Val Acc:  94.43%
+> Iter: 1800, Train Loss: 0.0068, Train Acc: 100.00%, Val Loss: 0.15, Val Acc:  96.57%
+> Iter: 1900, Train Loss: 0.0051, Train Acc: 100.00%, Val Loss: 0.17, Val Acc:  96.57%
+> Epoch: 10
+> Iter: 2000, Train Loss: 0.0011, Train Acc: 100.00%, Val Loss: 0.16, Val Acc:  95.97%
+> Iter: 2100, Train Loss:   0.01, Train Acc: 100.00%, Val Loss: 0.16, Val Acc:  95.86%
+> ```
+
+结果上来看，效果更差了。效果最好的还是最初版本的参数效果最好。
 
 ![](.\img\tensorboard-acc.png)
 
-<center>图10：准确率变化</center>
+<center>图10：初版参数准确率变化</center>
+
 ![](.\img\tensorboard_loss.png)
 
-<center>图11：loss变化</center>
+<center>图11：初版参数loss变化</center>
+
+
+
 ## 4. 模型效果
 
 训练得到的最优模型保存在**./checkpoint/best**目录下，利用该模型在测试集上测试模型效果。
-
-```python
-from sklearn import metrics
-
-session = tf.Session()
-session.run(tf.global_variables_initializer())
-saver = tf.train.Saver()
-saver.restore(sess=session, save_path='checkpoints/best/')  # 读取保存的模型
-
-
-loss_test, acc_test = evaluate(session, test_input, test_output)
-msg = 'Test Loss: {0:>6.2}, Test Acc: {1:>7.2%}'
-print(msg.format(loss_test, acc_test))
-
-batch_size = 128
-data_len = len(test_input)
-num_batch = int((data_len - 1) / batch_size) + 1
-
-test_cls = np.argmax(test_output, 1)
-pred_cls = np.zeros(shape=len(test_input), dtype=np.int32)  # 保存预测结果
-
-# 分批运行
-for i in range(num_batch): 
-    start_id = i * batch_size
-    end_id = min((i + 1) * batch_size, data_len)
-    feed_dict = {
-        input_x: test_input[start_id:end_id],
-        keep_prob: 1.0
-    }
-    pred_cls[start_id:end_id] = session.run(y_pred_cls, feed_dict=feed_dict)
-
-# 输出评估结果
-print(metrics.classification_report(test_cls, pred_cls, target_names=type_df['type']))
-```
 
 输出结果如下：
 
@@ -508,20 +531,36 @@ print(metrics.classification_report(test_cls, pred_cls, target_names=type_df['ty
 > weighted avg       0.97      0.96      0.96      1689
 > ```
 
-从输出可以看出，模型在测试集上准确率达到**96.45%**，这个结果还是令人满意的。
+从输出可以看出，模型在测试集上准确率达到**96.45%**，这个结果比基准**89.6%**要高不少。
 
 从各分类的准确率、召回率和F1-score上看，其他和养老险这2各分类准确率很低，需要进一步优化。
+
+输出一下混合矩阵
+
+![](.\img\p12.png)
+
+<center>图12：测试集混合矩阵</center>
+
+可以发现：
+
+* 分类2(其他)：测试数据很少，只有5条数据，有1条错误分类成了6(寿险)，1条错误分类成了8(租赁险)
+* 分类10(退休计划): 有22条错误分类成了3(养老险)
+
+只有这2项拉低了准确率，如果去除这2类，其余分类的准确率平均可以达到**99%**，这个结果相当不错。
+
+对于其他和养老险，后续做专门针对性的优化。
 
 ## 5. 结论
 
 从验证和测试结果来看分类效果非常理想，能够达到项目的评估指标。
 
-但是具体到各分类，**其他**和**养老险**这两个类别准确很低，其中**其他**的准确率只有33%。稍微研究了一下这两个分类的数，**其他**准确率的原因主要是数据量太少，模型没有很好的提取出问题特征。而养老险跟年金、医疗险和健康险的特征比较接近，没有很好的泛化。
+但是具体到各分类，**其他**和**养老险**这两个类别准确很低，其中**其他**的准确率只有33%。稍微研究了一下这两个分类的数，**其他**准确率的原因主要是数据量太少，模型没有很好的提取出问题特征。而养老险和退休计划比较接近，因为退休和养老本身概念相关性很高，所以没有很好的泛化。
 
-后面会针对这两个分类做更深入的研究
+后面会针对这两个分类做更深入的研究：
 
-1. 增加其他分类的数据样本
-2. 采用RNN重写模型，验证RNN能否更好的解决养老险无法有效提取特征的问题。
+1. 增加其他分类的数据样本；
+2. 考虑将`退休计划`和`养老险`进行合并；
+3. 采用RNN重写模型，验证RNN能否更好的解决养老险和退休计划无法有效提取特征的问题。
 
 ## 参考文献
 
